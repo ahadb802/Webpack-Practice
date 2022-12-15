@@ -1,60 +1,95 @@
-import { Todo, toDoObject } from './toDoObject.js';
-import toDoItemStatus from './clearAll.js';
-import TodoMagazine from './TodoMagazine.js';
+import addTodoTask from './addTodoTask.js';
+import removeToDo from './removeToDo.js';
+import updateToDo from './updateToDo.js';
+import checkToDoList from './checkToDoList.js';
+import clearAll from './clearAll.js';
 
-const todoList = document.querySelector('#todoList');
-const createTodoList = () => {
-  TodoMagazine(toDoObject);
-  todoList.innerHTML = toDoObject
-    .map((data) => `<li id="todoItem" class="todoItem"><input type="checkbox" id="checked" ${
-      data.completed ? 'checked' : ''} >
-      <input type="text" id="listItem" value= "${data.description}">
-      <i title="Click to Delete" class="fa-solid fa-ellipsis-vertical move"></i>
-      <i class="fa-solid fa-trash-can" id="delete"></i></li>`)
-    .join('');
-  const deleteBtn = document.querySelectorAll('#delete');
-  const move = document.querySelectorAll('.move');
-  const todo = document.querySelectorAll('#todoItem');
-  const listItem = document.querySelectorAll('#listItem');
-  const trash = document.querySelectorAll('.fa-trash-can');
-  const clear = document.querySelector('.clearCompleted');
+const addInput = document.querySelector('.todo-input');
+let todos = localStorage.getItem('toDoList') !== null ? JSON.parse(localStorage.getItem('toDoList')) : [];
+let index = todos.length;
+const todoDiv = document.querySelector('#todoList');
+const clearBtn = document.querySelector('.clear-button');
 
-  move.forEach((button, index) => button.addEventListener('click', () => {
-    move[index].style.display = 'none';
-    deleteBtn[index].style.display = 'flex';
-    trash[index].style.color = 'red';
-    todo[index].style.backgroundColor = '#DFDEAB';
-    listItem[index].style.backgroundColor = '#DFDEAB';
-    deleteBtn[index].backgroundColor = '#DFDEAB';
-  }));
-
-  deleteBtn.forEach((button, index) => button.addEventListener('click', () => {
-    const item = index + 1;
-    Todo.removeTodo(item);
-    createTodoList();
-  }));
-
-  listItem.forEach((input, index) => input.addEventListener('click', () => {
-    todo[index].style.backgroundColor = '#dfdeab';
-    listItem[index].style.backgroundColor = '#dfdeab';
-    deleteBtn[index].backgroundColor = '#dfdeab';
-  }));
-
-  listItem.forEach((input, index) => input.addEventListener('change', () => {
-    toDoObject[index].description = input.value;
-    TodoMagazine(toDoObject);
-  }));
-
-  clear.addEventListener('click', () => {
-    const completed = toDoObject.filter((data) => data.completed === true);
-    completed.forEach((data) => {
-      const index = toDoObject.indexOf(data);
-      toDoObject.splice(index, 1);
+const render = () => {
+  if (todos !== null) {
+    todoDiv.innerHTML = '';
+    todos.forEach((todo) => {
+      const check = todo.completed === true ? 'checked' : '';
+      todoDiv.innerHTML += `
+        <div class="todos">
+          <input type="checkbox" class="todo-check " value="${todo.completed}" ${check}>
+          <input type="text" class="todo-desc clear-border ${check}" value="${todo.desc}">
+          <i class="fa-solid fa-ellipsis-vertical"></i>
+          <button type="button" class="trash-btn"><i class="fa fa-trash"></i></button>
+        </div>
+      `;
     });
-    TodoMagazine(toDoObject);
-    createTodoList();
-  });
-  toDoItemStatus();
+  }
+
+  for (let i = 0; i < todoDiv.querySelectorAll('.todos').length; i += 1) {
+    const todoRow = todoDiv.querySelectorAll('.todos')[i];
+    // eslint-disable-next-line no-loop-func
+    todoRow.querySelector('.todo-check').addEventListener('click', () => {
+      const result = checkToDoList(i, todos);
+      localStorage.setItem('todos', JSON.stringify(result));
+      render();
+    });
+
+    todoRow.addEventListener('focusin', () => {
+      todoRow.classList.add('active');
+      todoRow.querySelector('.todo-desc').classList.add('active');
+      todoRow.querySelector('.trash-btn').style.display = 'block';
+      todoRow.querySelector('.fa-ellipsis-vertical').style.display = 'none';
+    });
+
+    // eslint-disable-next-line no-loop-func
+    todoRow.querySelector('.trash-btn').addEventListener('click', () => {
+      const updTodo = removeToDo(i, todos);
+      for (let a = i; a < updTodo.length; a += 1) {
+        updTodo[a].index -= 1;
+      }
+      index -= 1;
+      localStorage.setItem('toDoList', JSON.stringify(updTodo));
+      render();
+    });
+
+    todoRow.addEventListener('focusout', (e) => {
+      const parent = todoRow;
+      const leavingParent = !parent.contains(e.relatedTarget);
+      if (leavingParent) {
+        todoRow.classList.remove('active');
+        todoRow.querySelector('.todo-desc').classList.remove('active');
+        todoRow.querySelector('.fa-ellipsis-vertical').style.display = 'flex';
+        todoRow.querySelector('.trash-btn').style.display = 'none';
+      }
+    });
+
+    // eslint-disable-next-line no-loop-func
+    todoRow.querySelector('.todo-desc').addEventListener('change', (e) => {
+      const result = updateToDo(i, todos, e.target.value);
+      localStorage.setItem('toDoList', JSON.stringify(result));
+    });
+  }
 };
 
-export default createTodoList;
+addInput.addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') {
+    if (addInput.value !== '') {
+      const todoVal = addInput.value;
+      addInput.value = '';
+      index += 1;
+      const updTodo = addTodoTask({ index, desc: todoVal, completed: false }, todos);
+      localStorage.setItem('toDoList', JSON.stringify(updTodo));
+      render();
+    }
+  }
+});
+
+clearBtn.addEventListener('click', () => {
+  todos = clearAll(todos);
+  index = todos.length;
+  localStorage.setItem('toDoList', JSON.stringify(todos));
+  render();
+});
+
+window.onload = render();
