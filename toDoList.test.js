@@ -20,8 +20,8 @@ describe('todo functions - ADD & REMOVE', () => {
     expect(JSON.parse(localStorage.getItem('toDoListItem'))).toEqual(result);
     for (let i = 0; i < result.length; i += 1) {
       document.body.innerHTML += '<div class="list-item">'
-        + '  <ul id="list"><li></li></ul>'
-        + '</div>';
+      + '  <ul id="list"><li></li></ul>'
+      + '</div>';
     }
     const list = document.querySelectorAll('.list-item');
     expect(list).toHaveLength(result.length);
@@ -48,8 +48,8 @@ describe('todo functions - ADD & REMOVE', () => {
     document.body.innerHTML = '';
     for (let i = 0; i < output.length; i += 1) {
       document.body.innerHTML += '<div class="list-item">'
-        + '  <ul id="list"><li></li></ul>'
-        + '</div>';
+      + '  <ul id="list"><li></li></ul>'
+      + '</div>';
     }
     const list = document.querySelectorAll('.list-item');
     expect(list).toHaveLength(output.length);
