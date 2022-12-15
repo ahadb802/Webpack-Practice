@@ -2,7 +2,7 @@
 * @jest-environment jsdom
 */
 const addTodoTask = require('./src/modules/addTodoTask.js');
-const removeToDo = require('./src/modules/removeToDo.js'); 
+const removeToDo = require('./src/modules/removeToDo.js');
 
 describe('todo functions - ADD & REMOVE', () => {
   test('add a todo', () => {
@@ -20,14 +20,14 @@ describe('todo functions - ADD & REMOVE', () => {
     expect(JSON.parse(localStorage.getItem('toDoListItem'))).toEqual(result);
     for (let i = 0; i < result.length; i += 1) {
       document.body.innerHTML += '<div class="list-item">'
-      + '  <ul id="list"><li></li></ul>'
-      + '</div>';
+        + '  <ul id="list"><li></li></ul>'
+        + '</div>';
     }
     const list = document.querySelectorAll('.list-item');
     expect(list).toHaveLength(result.length);
   });
 
-    test('delete an item', () => {
+  test('delete an item', () => {
     const todoList = [
       {
         desc: 'one',
@@ -48,8 +48,8 @@ describe('todo functions - ADD & REMOVE', () => {
     document.body.innerHTML = '';
     for (let i = 0; i < output.length; i += 1) {
       document.body.innerHTML += '<div class="list-item">'
-      + '  <ul id="list"><li></li></ul>'
-      + '</div>';
+        + '  <ul id="list"><li></li></ul>'
+        + '</div>';
     }
     const list = document.querySelectorAll('.list-item');
     expect(list).toHaveLength(output.length);
